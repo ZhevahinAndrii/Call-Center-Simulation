@@ -1,0 +1,29 @@
+version: '3.11'
+
+services:
+  call-center-app:
+    build: .
+    container_name: call_center_simulation
+    
+    # 1. Завантажуємо всі змінні з файлу .env
+    env_file:
+      - .env
+      
+    # 2. Налаштування портів: [ЗОВНІШНІЙ APP_PORT] : [ВНУТРІШНІЙ STREAMLIT_SERVER_PORT]
+    ports:
+      - "${APP_PORT}:${STREAMLIT_SERVER_PORT}"
+      
+    # 3. Передаємо змінні середовища в контейнер:
+    environment:
+      # Параметри запуску (для Streamlit CLI)
+      - STREAMLIT_SERVER_ADDRESS=${STREAMLIT_SERVER_ADDRESS}
+      - STREAMLIT_SERVER_PORT=${STREAMLIT_SERVER_PORT}
+      # Параметри відображення (для Python-коду)
+      - APP_PORT=${APP_PORT}
+      - APP_HOST=${APP_HOST}
+      
+    # Монтування коду для швидкого оновлення без перезбирання
+    volumes:
+      - ./:/project
+      
+    restart: unless-stopped
