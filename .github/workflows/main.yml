@@ -56,6 +56,10 @@ jobs:
     # Запускається лише для події PUSH до гілки main
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
+    permissions:
+      contents: read     # Дозвіл на читання вмісту репозиторію
+      packages: write    # Дозвіл на запис (Push) до GitHub Packages (GHCR)
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
