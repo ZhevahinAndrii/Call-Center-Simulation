@@ -41,15 +41,15 @@ cd Call-Center-Simulation
 ```dotenv
 # === 1. ЗОВНІШНЯ КОНФІГУРАЦІЯ (для доступу з браузера) ===
 # Порт, який буде прокинуто назовні Docker або використано локально
-APP_PORT=...
+APP_PORT=8080
 # Адреса для відображення в інтерфейсі
-APP_HOST=...
+APP_HOST=localhost
 
 # === 2. ВНУТРІШНЯ КОНФІГУРАЦІЯ STREAMLIT (для контейнера) ===
 # Хост, на якому Streamlit слухає (0.0.0.0 обов'язково для Docker)
 STREAMLIT_SERVER_ADDRESS=0.0.0.0
 # Порт, на якому Streamlit запускається всередині контейнера
-STREAMLIT_SERVER_PORT=...
+STREAMLIT_SERVER_PORT=8502
 ```
 
 ### 4. Збірка та Запуск(Локально)
