@@ -1,0 +1,90 @@
+name: Streamlit CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: call-center-app
+  DOCKERFILE_PATH: Dockerfile
+
+jobs:
+  # ==============================
+  # 1. CI: ЗБІРКА ТА ТЕСТУВАННЯ
+  # ==============================
+  ci_build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # --- Етап інтеграції (Перевірка коду) ---
+      # Примітка: для повноцінного тестування вам потрібно додати пакет pytest та тести
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Використовуйте версію з вашого Dockerfile
+      
+      - name: Install Linting Tools
+        run: pip install flake8
+        
+      - name: Run Linters (Static Analysis)
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      # --- Етап збірки образу (Перевірка Dockerfile та залежностей) ---
+      - name: Build Docker Image Check (No Push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE_PATH }}
+          push: false # Тільки перевіряємо, що збірка успішна
+          tags: ${{ env.IMAGE_NAME }}:test-build
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ==============================
+  # 2. CD: ДЕПЛОЙ (ЗБІРКА ТА PUSH)
+  # ==============================
+  cd_push_image:
+    name: Push to GHCR
+    runs-on: ubuntu-latest
+    # Запускається лише після успішного завершення CI-тестів
+    needs: [ci_build_and_test]
+    # Запускається лише для події PUSH до гілки main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          # Використовуємо вбудований токен GitHub для аутентифікації
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Extract Metadata (tags and labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+            
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE_PATH }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

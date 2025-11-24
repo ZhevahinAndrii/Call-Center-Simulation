@@ -1,5 +1,5 @@
 # Використовуємо легкий образ Python
-FROM python:3.10-slim
+FROM python:3.11
 
 # Робоча директорія в контейнері - корінь проекту
 WORKDIR /project
@@ -15,8 +15,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копіюємо весь код проекту
 COPY . .
 
-# Відкриваємо внутрішній порт Streamlit (буде прокинутий через docker-compose)
-EXPOSE 8501
 # Запуск додатку
 # Streamlit CLI автоматично зчитає змінні STREAMLIT_SERVER_ADDRESS/PORT
 CMD ["streamlit", "run", "app/streamlit_app.py"]

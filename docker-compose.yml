@@ -1,5 +1,4 @@
 version: '3.11'
-
 services:
   call-center-app:
     build: .
@@ -18,9 +17,6 @@ services:
       # Параметри запуску (для Streamlit CLI)
       - STREAMLIT_SERVER_ADDRESS=${STREAMLIT_SERVER_ADDRESS}
       - STREAMLIT_SERVER_PORT=${STREAMLIT_SERVER_PORT}
-      # Параметри відображення (для Python-коду)
-      - APP_PORT=${APP_PORT}
-      - APP_HOST=${APP_HOST}
       
     # Монтування коду для швидкого оновлення без перезбирання
     volumes:
